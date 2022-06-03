@@ -30,6 +30,14 @@ export class Anchor extends Vector {
   _largeArcFlag = 0;
   _sweepFlag = 1;
 
+  command : string = "";
+  relative : boolean = true;
+  rx : number = 0;
+  ry : number = 0;
+  xAxisRotation : number = 0;
+  largeArcFlag : number = 0;
+  sweepFlag : number = 0;
+
   constructor(x = 0, y = 0, ax = 0, ay = 0, bx = 0, by = 0, command = Commands.move) {
 
     super(x, y);
@@ -65,7 +73,7 @@ export class Anchor extends Vector {
    * @param {Two.Anchor} v - The anchor to apply values to.
    * @description Copy the properties of one {@link Two.Anchor} onto another.
    */
-  copy(v) {
+  copy(v : Anchor) {
 
     this.x = v.x;
     this.y = v.y;

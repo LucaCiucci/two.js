@@ -1,6 +1,7 @@
 import { root } from './root.js';
+import type { Shape } from '../shape.js';
+import { Matrix } from '../matrix.js';
 
-let Matrix;
 const TWO_PI = Math.PI * 2;
 const HALF_PI = Math.PI * 0.5;
 
@@ -41,7 +42,11 @@ function decomposeMatrix(matrix, b, c, d, e, f) {
 }
 
 function setMatrix(matrix) {
-  Matrix = matrix;
+	// TODO: ???
+
+	// @ts-ignore
+	// eslint-disable-next-line
+	Matrix = matrix;
 }
 
 /**
@@ -52,15 +57,15 @@ function setMatrix(matrix) {
  * @returns {Two.Matrix} The computed matrix of a nested object. If no `matrix` was passed in arguments then a `new Two.Matrix` is returned.
  * @description Method to get the world space transformation of a given object in a Two.js scene.
  */
-function getComputedMatrix(object, matrix) {
+function getComputedMatrix(object : Shape, matrix : Matrix) {
 
   matrix = (matrix && matrix.identity()) || new Matrix();
   let parent = object;
   const matrices = [];
 
-  while (parent && parent._matrix) {
-    matrices.push(parent._matrix);
-    parent = parent.parent;
+  while (parent && parent["_matrix"]) {
+    matrices.push(parent["_matrix"]);
+    parent = parent["parent"]; // TODO: Use `parent.parent` instead of `parent["parent"]`
   }
 
   matrices.reverse();
@@ -69,8 +74,10 @@ function getComputedMatrix(object, matrix) {
 
     const m = matrices[i];
     const e = m.elements;
-    matrix.multiply(
-      e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], e[8], e[9]);
+	matrix.multiply(
+		e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], e[8]);
+    //matrix.multiply(
+    //  e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], e[8], e[9]);// ERROR!
 
   }
 
