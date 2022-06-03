@@ -1,5 +1,6 @@
 import { Events } from './events.js';
 import { Collection } from './collection.js';
+import type { Shape } from './shape.js';
 
 /**
  * @class
@@ -35,7 +36,7 @@ export class Children extends Collection {
    * @param {Two.Shape[]} children - The objects which extend {@link Two.Shape} to be added.
    * @description Adds elements to the `ids` map.
    */
-  attach(children) {
+  attach(children : Shape[]) {
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       if (child && child.id) {
