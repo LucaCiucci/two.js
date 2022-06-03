@@ -21,7 +21,7 @@
     "docs:build": "vuepress build wiki",
     "docs:publish": "./deploy.sh",
     "lint": "eslint . --fix",
-    "types": "tsc --outFile types.d.ts"
+    "types": "npx tsc --project ./tsconfig-types.d.ts.json"
   },
   "directories": {
     "docs": "wiki/docs",
