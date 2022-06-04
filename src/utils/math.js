@@ -1,6 +1,4 @@
 import { root } from './root.js';
-import type { Shape } from '../shape.js';
-import { Matrix } from '../matrix.js';
 
 const TWO_PI = Math.PI * 2;
 const HALF_PI = Math.PI * 0.5;
@@ -57,7 +55,7 @@ function setMatrix(matrix) {
  * @returns {Two.Matrix} The computed matrix of a nested object. If no `matrix` was passed in arguments then a `new Two.Matrix` is returned.
  * @description Method to get the world space transformation of a given object in a Two.js scene.
  */
-function getComputedMatrix(object : Shape, matrix : Matrix) {
+function getComputedMatrix(object, matrix) {
 
   matrix = (matrix && matrix.identity()) || new Matrix();
   let parent = object;

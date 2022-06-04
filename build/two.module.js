@@ -67,7 +67,6 @@ if (typeof window !== "undefined") {
 }
 
 // src/utils/math.js
-var Matrix;
 var TWO_PI = Math.PI * 2;
 var HALF_PI = Math.PI * 0.5;
 function decomposeMatrix(matrix3, b, c, d, e, f) {
@@ -97,15 +96,15 @@ function getComputedMatrix(object, matrix3) {
   matrix3 = matrix3 && matrix3.identity() || new Matrix();
   let parent = object;
   const matrices = [];
-  while (parent && parent._matrix) {
-    matrices.push(parent._matrix);
-    parent = parent.parent;
+  while (parent && parent["_matrix"]) {
+    matrices.push(parent["_matrix"]);
+    parent = parent["parent"];
   }
   matrices.reverse();
   for (let i = 0; i < matrices.length; i++) {
     const m = matrices[i];
     const e = m.elements;
-    matrix3.multiply(e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], e[8], e[9]);
+    matrix3.multiply(e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], e[8]);
   }
   return matrix3;
 }
@@ -147,11 +146,11 @@ __export(curves_exports, {
   subdivide: () => subdivide
 });
 
-// src/events.js
+// src/events.ts
 var Events = class {
   constructor() {
-    __publicField(this, "_events", {});
-    __publicField(this, "_bound", false);
+    this._events = {};
+    this._bound = false;
   }
   addEventListener(name, handler) {
     const list = this._events[name] || (this._events[name] = []);
@@ -234,7 +233,7 @@ var Events = class {
     return this;
   }
 };
-__publicField(Events, "Types", {
+Events.Types = {
   play: "play",
   pause: "pause",
   update: "update",
@@ -245,8 +244,8 @@ __publicField(Events, "Types", {
   insert: "insert",
   order: "order",
   load: "load"
-});
-__publicField(Events, "Methods", [
+};
+Events.Methods = [
   "addEventListener",
   "on",
   "removeEventListener",
@@ -256,49 +255,38 @@ __publicField(Events, "Methods", [
   "trigger",
   "listen",
   "ignore"
-]);
+];
 
-// src/vector.js
-var proto = {
-  x: {
-    enumerable: true,
-    get: function() {
-      return this._x;
-    },
-    set: function(v) {
-      if (this._x !== v) {
-        this._x = v;
-        if (this._bound) {
-          this.dispatchEvent(Events.Types.change);
-        }
-      }
-    }
-  },
-  y: {
-    enumerable: true,
-    get: function() {
-      return this._y;
-    },
-    set: function(v) {
-      if (this._y !== v) {
-        this._y = v;
-        if (this._bound) {
-          this.dispatchEvent(Events.Types.change);
-        }
-      }
-    }
-  }
-};
+// src/vector.ts
 var _Vector = class extends Events {
   constructor(x = 0, y = 0) {
     super();
-    __publicField(this, "_x", 0);
-    __publicField(this, "_y", 0);
-    for (let prop in proto) {
-      Object.defineProperty(this, prop, proto[prop]);
-    }
+    this._x = 0;
+    this._y = 0;
     this.x = x;
     this.y = y;
+  }
+  get x() {
+    return this._x;
+  }
+  set x(v) {
+    if (this._x !== v) {
+      this._x = v;
+      if (this._bound) {
+        this.dispatchEvent(Events.Types.change);
+      }
+    }
+  }
+  get y() {
+    return this._y;
+  }
+  set y(v) {
+    if (this._y !== v) {
+      this._y = v;
+      if (this._bound) {
+        this.dispatchEvent(Events.Types.change);
+      }
+    }
   }
   static add(v1, v2) {
     return new _Vector(v1.x + v2.x, v1.y + v2.y);
@@ -394,7 +382,7 @@ var _Vector = class extends Events {
   subtractSelf(v) {
     return this.sub.apply(this, arguments);
   }
-  multiply(x, y) {
+  multiply(x, y = null) {
     if (arguments.length <= 0) {
       return this;
     } else if (arguments.length <= 1) {
@@ -406,8 +394,12 @@ var _Vector = class extends Events {
         this.y *= x.y;
       }
     } else {
-      this.x *= x;
-      this.y *= y;
+      if (typeof x === "number") {
+        this.x *= x;
+        this.y *= y;
+      } else {
+        console.error("Two.Vector.multiply - Cannot multiply by a non-number.");
+      }
     }
     return this;
   }
@@ -417,7 +409,7 @@ var _Vector = class extends Events {
   multiplyScalar(s) {
     return this.multiply(s);
   }
-  divide(x, y) {
+  divide(x, y = null) {
     if (arguments.length <= 0) {
       return this;
     } else if (arguments.length <= 1) {
@@ -429,8 +421,12 @@ var _Vector = class extends Events {
         this.y /= x.y;
       }
     } else {
-      this.x /= x;
-      this.y /= y;
+      if (typeof x === "number") {
+        this.x /= x;
+        this.y /= y;
+      } else {
+        console.error("Two.Vector.divide - Cannot divide by a non-number.");
+      }
     }
     if (isNaN(this.x)) {
       this.x = 0;
@@ -502,29 +498,36 @@ var _Vector = class extends Events {
   }
 };
 var Vector = _Vector;
-__publicField(Vector, "zero", new _Vector());
-__publicField(Vector, "left", new _Vector(-1, 0));
-__publicField(Vector, "right", new _Vector(1, 0));
-__publicField(Vector, "up", new _Vector(0, -1));
-__publicField(Vector, "down", new _Vector(0, 1));
+Vector.zero = new _Vector();
+Vector.left = new _Vector(-1, 0);
+Vector.right = new _Vector(1, 0);
+Vector.up = new _Vector(0, -1);
+Vector.down = new _Vector(0, 1);
 
-// src/anchor.js
+// src/anchor.ts
 var Anchor = class extends Vector {
   constructor(x = 0, y = 0, ax = 0, ay = 0, bx = 0, by = 0, command = Commands.move) {
     super(x, y);
-    __publicField(this, "controls", {
+    this.controls = {
       left: new Vector(),
       right: new Vector()
-    });
-    __publicField(this, "_command", Commands.move);
-    __publicField(this, "_relative", true);
-    __publicField(this, "_rx", 0);
-    __publicField(this, "_ry", 0);
-    __publicField(this, "_xAxisRotation", 0);
-    __publicField(this, "_largeArcFlag", 0);
-    __publicField(this, "_sweepFlag", 1);
-    for (let prop in proto2) {
-      Object.defineProperty(this, prop, proto2[prop]);
+    };
+    this._command = Commands.move;
+    this._relative = true;
+    this._rx = 0;
+    this._ry = 0;
+    this._xAxisRotation = 0;
+    this._largeArcFlag = 0;
+    this._sweepFlag = 1;
+    this.command = "";
+    this.relative = true;
+    this.rx = 0;
+    this.ry = 0;
+    this.xAxisRotation = 0;
+    this.largeArcFlag = 0;
+    this.sweepFlag = 0;
+    for (let prop in proto) {
+      Object.defineProperty(this, prop, proto[prop]);
     }
     this.command = command;
     this.relative = true;
@@ -598,7 +601,7 @@ var Anchor = class extends Vector {
     return JSON.stringify(this.toObject());
   }
 };
-var proto2 = {
+var proto = {
   command: {
     enumerable: true,
     get: function() {
@@ -707,8 +710,8 @@ var Constants = {
     svg: "SVGRenderer",
     canvas: "CanvasRenderer"
   },
-  Version: "v0.8.10",
-  PublishDate: "2022-06-04T04:53:21.949Z",
+  Version: "v0.8.8",
+  PublishDate: "2022-06-04T10:58:28.490Z",
   Identifier: "two-",
   Resolution: 12,
   AutoCalculateImportedMatrices: true,
@@ -989,25 +992,25 @@ var _ = {
   performance: root.performance && root.performance.now ? root.performance : Date
 };
 
-// src/element.js
+// src/element.ts
 var Element = class extends Events {
   constructor() {
     super();
-    __publicField(this, "_flagId", false);
-    __publicField(this, "_flagClassName", false);
-    __publicField(this, "_renderer", {});
-    __publicField(this, "_id", "");
-    __publicField(this, "_className", "");
-    __publicField(this, "classList", []);
-    for (let prop in proto3) {
-      Object.defineProperty(this, prop, proto3[prop]);
+    this._flagId = false;
+    this._flagClassName = false;
+    this._renderer = {};
+    this._id = "";
+    this._className = "";
+    this.classList = [];
+    for (let prop in proto2) {
+      Object.defineProperty(this, prop, proto2[prop]);
     }
   }
   flagReset() {
     this._flagId = this._flagClassName = false;
   }
 };
-var proto3 = {
+var proto2 = {
   renderer: {
     enumerable: false,
     get: function() {
@@ -1385,8 +1388,8 @@ var Shape = class extends Element {
     __publicField(this, "_scale", 1);
     __publicField(this, "_skewX", 0);
     __publicField(this, "_skewY", 0);
-    for (let prop in proto4) {
-      Object.defineProperty(this, prop, proto4[prop]);
+    for (let prop in proto3) {
+      Object.defineProperty(this, prop, proto3[prop]);
     }
     this._renderer.flagMatrix = FlagMatrix.bind(this);
     this.isShape = true;
@@ -1406,10 +1409,10 @@ var Shape = class extends Element {
     this._renderer = v;
   }
   get translation() {
-    return proto4.position.get.apply(this, arguments);
+    return proto3.position.get.apply(this, arguments);
   }
   set translation(v) {
-    proto4.position.set.apply(this, arguments);
+    proto3.position.set.apply(this, arguments);
   }
   addTo(group) {
     group.add(this);
@@ -1462,7 +1465,7 @@ var Shape = class extends Element {
     return this;
   }
 };
-var proto4 = {
+var proto3 = {
   position: {
     enumerable: true,
     get: function() {
@@ -1643,12 +1646,12 @@ var Collection = class extends Array {
   }
 };
 
-// src/children.js
+// src/children.ts
 var Children = class extends Collection {
   constructor(children) {
     children = Array.isArray(children) ? children : Array.prototype.slice.call(arguments);
     super(children);
-    __publicField(this, "ids", {});
+    this.ids = {};
     this.attach(children);
     this.on(Events.Types.insert, this.attach);
     this.on(Events.Types.remove, this.detach);
@@ -1699,8 +1702,8 @@ var _Group = class extends Shape {
     __publicField(this, "_ending", 1);
     __publicField(this, "_length", 0);
     __publicField(this, "_mask", null);
-    for (let prop in proto5) {
-      Object.defineProperty(this, prop, proto5[prop]);
+    for (let prop in proto4) {
+      Object.defineProperty(this, prop, proto4[prop]);
     }
     this._renderer.type = "group";
     this.additions = [];
@@ -2003,7 +2006,7 @@ __publicField(Group, "Properties", [
   "curved",
   "automatic"
 ]);
-var proto5 = {
+var proto4 = {
   visible: {
     enumerable: true,
     get: function() {
@@ -3204,8 +3207,8 @@ var _Stop = class extends Element {
     __publicField(this, "_offset", 0);
     __publicField(this, "_opacity", 1);
     __publicField(this, "_color", "#fff");
-    for (let prop in proto6) {
-      Object.defineProperty(this, prop, proto6[prop]);
+    for (let prop in proto5) {
+      Object.defineProperty(this, prop, proto5[prop]);
     }
     this._renderer.type = "stop";
     this.offset = typeof offset === "number" ? offset : _Stop.Index <= 0 ? 0 : 1;
@@ -3239,7 +3242,7 @@ var _Stop = class extends Element {
 var Stop = _Stop;
 __publicField(Stop, "Index", 0);
 __publicField(Stop, "Properties", ["offset", "opacity", "color"]);
-var proto6 = {
+var proto5 = {
   offset: {
     enumerable: true,
     get: function() {
@@ -3290,8 +3293,8 @@ var _Gradient = class extends Element {
     __publicField(this, "_flagUnits", false);
     __publicField(this, "_spread", "");
     __publicField(this, "_units", "");
-    for (let prop in proto7) {
-      Object.defineProperty(this, prop, proto7[prop]);
+    for (let prop in proto6) {
+      Object.defineProperty(this, prop, proto6[prop]);
     }
     this._renderer.type = "gradient";
     this.id = Constants.Identifier + Constants.uniqueId();
@@ -3344,7 +3347,7 @@ var _Gradient = class extends Element {
 var Gradient = _Gradient;
 __publicField(Gradient, "Stop", Stop);
 __publicField(Gradient, "Properties", ["spread", "stops", "renderer", "units"]);
-var proto7 = {
+var proto6 = {
   spread: {
     enumerable: true,
     get: function() {
@@ -3409,8 +3412,8 @@ var _LinearGradient = class extends Gradient {
     __publicField(this, "_flagEndPoints", false);
     __publicField(this, "_left", null);
     __publicField(this, "_right", null);
-    for (let prop in proto8) {
-      Object.defineProperty(this, prop, proto8[prop]);
+    for (let prop in proto7) {
+      Object.defineProperty(this, prop, proto7[prop]);
     }
     this._renderer.type = "linear-gradient";
     this._renderer.flagEndPoints = FlagEndPoints.bind(this);
@@ -3463,7 +3466,7 @@ var _LinearGradient = class extends Gradient {
 var LinearGradient = _LinearGradient;
 __publicField(LinearGradient, "Properties", ["left", "right"]);
 __publicField(LinearGradient, "Stop", Stop);
-var proto8 = {
+var proto7 = {
   left: {
     enumerable: true,
     get: function() {
@@ -3507,8 +3510,8 @@ var _RadialGradient = class extends Gradient {
     __publicField(this, "_radius", 0);
     __publicField(this, "_center", null);
     __publicField(this, "_focal", null);
-    for (let prop in proto9) {
-      Object.defineProperty(this, prop, proto9[prop]);
+    for (let prop in proto8) {
+      Object.defineProperty(this, prop, proto8[prop]);
     }
     this._renderer.type = "radial-gradient";
     this._renderer.flagCenter = FlagCenter.bind(this);
@@ -3567,7 +3570,7 @@ var _RadialGradient = class extends Gradient {
 var RadialGradient = _RadialGradient;
 __publicField(RadialGradient, "Stop", Stop);
 __publicField(RadialGradient, "Properties", ["center", "radius", "focal"]);
-var proto9 = {
+var proto8 = {
   radius: {
     enumerable: true,
     get: function() {
@@ -3641,8 +3644,8 @@ var _Texture = class extends Element {
     __publicField(this, "_scale", 1);
     __publicField(this, "_offset", null);
     this._renderer = {};
-    for (let prop in proto10) {
-      Object.defineProperty(this, prop, proto10[prop]);
+    for (let prop in proto9) {
+      Object.defineProperty(this, prop, proto9[prop]);
     }
     this._renderer.type = "texture";
     this._renderer.flagOffset = FlagOffset.bind(this);
@@ -3853,7 +3856,7 @@ __publicField(Texture, "Register", {
     }
   }
 });
-var proto10 = {
+var proto9 = {
   src: {
     enumerable: true,
     get: function() {
@@ -3983,8 +3986,8 @@ var _Path = class extends Shape {
     __publicField(this, "_mask", null);
     __publicField(this, "_clip", false);
     __publicField(this, "_dashes", null);
-    for (let prop in proto11) {
-      Object.defineProperty(this, prop, proto11[prop]);
+    for (let prop in proto10) {
+      Object.defineProperty(this, prop, proto10[prop]);
     }
     this._renderer.type = "path";
     this._renderer.flagVertices = FlagVertices.bind(this);
@@ -3994,8 +3997,8 @@ var _Path = class extends Shape {
     this._renderer.flagStroke = FlagStroke.bind(this);
     this._renderer.vertices = [];
     this._renderer.collection = [];
-    this.closed = !!closed2;
-    this.curved = !!curved;
+    this._closed = !!closed2;
+    this._curved = !!curved;
     this.beginning = 0;
     this.ending = 1;
     this.fill = "#fff";
@@ -4467,7 +4470,7 @@ __publicField(Path, "Properties", [
 __publicField(Path, "Utils", {
   getCurveLength: getCurveLength2
 });
-var proto11 = {
+var proto10 = {
   linewidth: {
     enumerable: true,
     get: function() {
@@ -4723,8 +4726,8 @@ var _Rectangle = class extends Path {
     __publicField(this, "_width", 0);
     __publicField(this, "_height", 0);
     __publicField(this, "_origin", null);
-    for (let prop in proto12) {
-      Object.defineProperty(this, prop, proto12[prop]);
+    for (let prop in proto11) {
+      Object.defineProperty(this, prop, proto11[prop]);
     }
     this.width = typeof width === "number" ? width : 1;
     this.height = typeof height === "number" ? height : 1;
@@ -4789,7 +4792,7 @@ var _Rectangle = class extends Path {
 };
 var Rectangle = _Rectangle;
 __publicField(Rectangle, "Properties", ["width", "height"]);
-var proto12 = {
+var proto11 = {
   width: {
     enumerable: true,
     get: function() {
@@ -4848,8 +4851,8 @@ var _Sprite = class extends Rectangle {
     __publicField(this, "_frameRate", 0);
     __publicField(this, "_index", 0);
     __publicField(this, "_origin", null);
-    for (let prop in proto13) {
-      Object.defineProperty(this, prop, proto13[prop]);
+    for (let prop in proto12) {
+      Object.defineProperty(this, prop, proto12[prop]);
     }
     this.noStroke();
     this.noFill();
@@ -5002,7 +5005,7 @@ __publicField(Sprite, "Properties", [
   "frameRate",
   "index"
 ]);
-var proto13 = {
+var proto12 = {
   texture: {
     enumerable: true,
     get: function() {
@@ -5068,8 +5071,8 @@ var _Circle = class extends Path {
     super(points, true, true, true);
     __publicField(this, "_flagRadius", false);
     __publicField(this, "_radius", 0);
-    for (let prop in proto14) {
-      Object.defineProperty(this, prop, proto14[prop]);
+    for (let prop in proto13) {
+      Object.defineProperty(this, prop, proto13[prop]);
     }
     if (typeof r === "number") {
       this.radius = r;
@@ -5145,7 +5148,7 @@ var _Circle = class extends Path {
 };
 var Circle = _Circle;
 __publicField(Circle, "Properties", ["radius"]);
-var proto14 = {
+var proto13 = {
   radius: {
     enumerable: true,
     get: function() {
@@ -5176,8 +5179,8 @@ var _Ellipse = class extends Path {
     __publicField(this, "_flagHeight", false);
     __publicField(this, "_width", 0);
     __publicField(this, "_height", 0);
-    for (let prop in proto15) {
-      Object.defineProperty(this, prop, proto15[prop]);
+    for (let prop in proto14) {
+      Object.defineProperty(this, prop, proto14[prop]);
     }
     if (typeof rx === "number") {
       this.width = rx * 2;
@@ -5259,7 +5262,7 @@ var _Ellipse = class extends Path {
 };
 var Ellipse = _Ellipse;
 __publicField(Ellipse, "Properties", ["width", "height"]);
-var proto15 = {
+var proto14 = {
   width: {
     enumerable: true,
     get: function() {
@@ -5290,15 +5293,15 @@ var Line = class extends Path {
       new Anchor(x2, y2)
     ];
     super(points);
-    for (let prop in proto16) {
-      Object.defineProperty(this, prop, proto16[prop]);
+    for (let prop in proto15) {
+      Object.defineProperty(this, prop, proto15[prop]);
     }
     this.vertices[0].command = Commands.move;
     this.vertices[1].command = Commands.line;
     this.automatic = false;
   }
 };
-var proto16 = {
+var proto15 = {
   left: {
     enumerable: true,
     get: function() {
@@ -5346,8 +5349,8 @@ var _RoundedRectangle = class extends Path {
     __publicField(this, "_width", 0);
     __publicField(this, "_height", 0);
     __publicField(this, "_radius", 12);
-    for (let prop in proto17) {
-      Object.defineProperty(this, prop, proto17[prop]);
+    for (let prop in proto16) {
+      Object.defineProperty(this, prop, proto16[prop]);
     }
     this.closed = true;
     this.automatic = false;
@@ -5476,7 +5479,7 @@ var _RoundedRectangle = class extends Path {
 };
 var RoundedRectangle = _RoundedRectangle;
 __publicField(RoundedRectangle, "Properties", ["width", "height", "radius"]);
-var proto17 = {
+var proto16 = {
   width: {
     enumerable: true,
     get: function() {
@@ -5557,8 +5560,8 @@ var _Text = class extends Shape {
     __publicField(this, "_mask", null);
     __publicField(this, "_clip", false);
     __publicField(this, "_dashes", null);
-    for (let prop in proto18) {
-      Object.defineProperty(this, prop, proto18[prop]);
+    for (let prop in proto17) {
+      Object.defineProperty(this, prop, proto17[prop]);
     }
     this._renderer.type = "text";
     this._renderer.flagFill = FlagFill2.bind(this);
@@ -5698,7 +5701,7 @@ __publicField(Text, "Properties", [
   "fill",
   "stroke"
 ]);
-var proto18 = {
+var proto17 = {
   value: {
     enumerable: true,
     get: function() {
@@ -6854,8 +6857,8 @@ var _ImageSequence = class extends Rectangle {
     __publicField(this, "_textures", null);
     __publicField(this, "_frameRate", 0);
     __publicField(this, "_origin", null);
-    for (let prop in proto19) {
-      Object.defineProperty(this, prop, proto19[prop]);
+    for (let prop in proto18) {
+      Object.defineProperty(this, prop, proto18[prop]);
     }
     this._renderer.flagTextures = FlagTextures.bind(this);
     this._renderer.bindTextures = BindTextures.bind(this);
@@ -7004,7 +7007,7 @@ __publicField(ImageSequence, "Properties", [
   "index"
 ]);
 __publicField(ImageSequence, "DefaultFrameRate", 30);
-var proto19 = {
+var proto18 = {
   frameRate: {
     enumerable: true,
     get: function() {
@@ -7084,8 +7087,8 @@ var _ArcSegment = class extends Path {
     __publicField(this, "_endAngle", TWO_PI);
     __publicField(this, "_innerRadius", 0);
     __publicField(this, "_outerRadius", 0);
-    for (let prop in proto20) {
-      Object.defineProperty(this, prop, proto20[prop]);
+    for (let prop in proto19) {
+      Object.defineProperty(this, prop, proto19[prop]);
     }
     if (typeof ir === "number") {
       this.innerRadius = ir;
@@ -7251,7 +7254,7 @@ var _ArcSegment = class extends Path {
 };
 var ArcSegment = _ArcSegment;
 __publicField(ArcSegment, "Properties", ["startAngle", "endAngle", "innerRadius", "outerRadius"]);
-var proto20 = {
+var proto19 = {
   startAngle: {
     enumerable: true,
     get: function() {
@@ -7326,8 +7329,8 @@ var _Points = class extends Shape {
     __publicField(this, "center", Path.prototype.center);
     __publicField(this, "getBoundingClientRect", Path.prototype.getBoundingClientRect);
     __publicField(this, "_updateLength", Path.prototype._updateLength);
-    for (let prop in proto21) {
-      Object.defineProperty(this, prop, proto21[prop]);
+    for (let prop in proto20) {
+      Object.defineProperty(this, prop, proto20[prop]);
     }
     this._renderer.type = "points";
     this._renderer.flagVertices = FlagVertices.bind(this);
@@ -7455,7 +7458,7 @@ __publicField(Points, "Properties", [
   "beginning",
   "ending"
 ]);
-var proto21 = {
+var proto20 = {
   linewidth: {
     enumerable: true,
     get: function() {
@@ -7614,8 +7617,8 @@ var _Polygon = class extends Path {
     __publicField(this, "_width", 0);
     __publicField(this, "_height", 0);
     __publicField(this, "_sides", 0);
-    for (let prop in proto22) {
-      Object.defineProperty(this, prop, proto22[prop]);
+    for (let prop in proto21) {
+      Object.defineProperty(this, prop, proto21[prop]);
     }
     this.closed = true;
     this.automatic = false;
@@ -7695,7 +7698,7 @@ var _Polygon = class extends Path {
 };
 var Polygon = _Polygon;
 __publicField(Polygon, "Properties", ["width", "height", "sides"]);
-var proto22 = {
+var proto21 = {
   radius: {
     enumerable: true,
     get: function() {
@@ -7745,10 +7748,10 @@ var proto22 = {
 var cos6 = Math.cos;
 var sin6 = Math.sin;
 var _Star = class extends Path {
-  constructor(x, y, innerRadius, outerRadius, sides) {
+  constructor(ox, oy, ir, or, sides) {
     if (arguments.length <= 3) {
-      outerRadius = innerRadius;
-      innerRadius = outerRadius / 2;
+      or = ir;
+      ir = or / 2;
     }
     if (typeof sides !== "number" || sides <= 0) {
       sides = 5;
@@ -7760,26 +7763,26 @@ var _Star = class extends Path {
     __publicField(this, "_innerRadius", 0);
     __publicField(this, "_outerRadius", 0);
     __publicField(this, "_sides", 0);
-    for (let prop in proto23) {
-      Object.defineProperty(this, prop, proto23[prop]);
+    for (let prop in proto22) {
+      Object.defineProperty(this, prop, proto22[prop]);
     }
     this.closed = true;
     this.automatic = false;
-    if (typeof innerRadius === "number") {
-      this.innerRadius = innerRadius;
+    if (typeof ir === "number") {
+      this.innerRadius = ir;
     }
-    if (typeof outerRadius === "number") {
-      this.outerRadius = outerRadius;
+    if (typeof or === "number") {
+      this.outerRadius = or;
     }
     if (typeof sides === "number") {
       this.sides = sides;
     }
     this._update();
-    if (typeof x === "number") {
-      this.translation.x = x;
+    if (typeof ox === "number") {
+      this.translation.x = ox;
     }
-    if (typeof y === "number") {
-      this.translation.y = y;
+    if (typeof oy === "number") {
+      this.translation.y = oy;
     }
   }
   _update() {
@@ -7846,7 +7849,7 @@ var _Star = class extends Path {
 };
 var Star = _Star;
 __publicField(Star, "Properties", ["innerRadius", "outerRadius", "sides"]);
-var proto23 = {
+var proto22 = {
   innerRadius: {
     enumerable: true,
     get: function() {
@@ -7860,10 +7863,10 @@ var proto23 = {
   outerRadius: {
     enumerable: true,
     get: function() {
-      return this._outerRadius;
+      return this._ourterRadius;
     },
     set: function(v) {
-      this._outerRadius = v;
+      this._ourterRadius = v;
       this._flagOuterRadius = true;
     }
   },

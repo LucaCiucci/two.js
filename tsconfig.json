@@ -1,11 +1,13 @@
 {
-  "include": ["src/two.js", "extras/jsm/**/*"],
+  "include": [ "./src/**/*" ],
   "compilerOptions": {
     "allowJs": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
+    "declaration" : true,
     "lib": ["es6", "dom"],
-    "module": "commonjs",
     "baseUrl": "./src/",
+    "target": "ES6",
+    "rootDir": "./src/",
+    "outDir": "./lib/",
+    "types": []
   }
 }
