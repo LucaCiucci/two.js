@@ -14,7 +14,7 @@ export class Star {
      * @property {String[]} - A list of properties that are on every {@link Two.Star}.
      */
     static Properties: string[];
-    constructor(ox: any, oy: any, ir: any, or: any, sides: any, ...args: any[]);
+    constructor(x: any, y: any, innerRadius: any, outerRadius: any, sides: any, ...args: any[]);
     /**
      * @name Two.Star#_flagInnerRadius
      * @private

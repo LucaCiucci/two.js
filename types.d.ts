@@ -2508,13 +2508,13 @@ declare module "two.js/src/path" {
          * @property {(String|Two.Gradient|Two.Texture)} - The value of what the path should be filled in with.
          * @see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value} for more information on CSS's colors as `String`.
          */
-        fill: string|Gradient|Texture;
+        fill: string;
         /**
          * @name Two.Path#stroke
          * @property {(String|Two.Gradient|Two.Texture)} - The value of what the path should be outlined in with.
          * @see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value} for more information on CSS's colors as `String`.
          */
-        stroke: string|Gradient|Texture;
+        stroke: string;
         /**
          * @name Two.Path#linewidth
          * @property {Number} - The thickness in pixels of the stroke.
@@ -2574,7 +2574,7 @@ declare module "two.js/src/path" {
          * @description A list of numbers that represent the repeated dash length and dash space applied to the stroke of the text.
          * @see {@link https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-dasharray} for more information on the SVG stroke-dasharray attribute.
          */
-        dashes: number[];
+        dashes: any[];
         /**
          * @name Two.Path#clone
          * @function
@@ -3904,13 +3904,13 @@ declare module "two.js/src/shapes/points" {
          * @property {(String|Two.Gradient|Two.Texture)} - The value of what the path should be filled in with.
          * @see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value} for more information on CSS's colors as `String`.
          */
-        fill: string|Gradient|Texture;
+        fill: string;
         /**
          * @name Two.Points#stroke
          * @property {(String|Two.Gradient|Two.Texture)} - The value of what the path should be outlined in with.
          * @see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value} for more information on CSS's colors as `String`.
          */
-        stroke: string|Gradient|Texture;
+        stroke: string;
         /**
          * @name Two.Points#className
          * @property {String} - A class to be applied to the element to be compatible with CSS styling.
@@ -3936,7 +3936,7 @@ declare module "two.js/src/shapes/points" {
          * @description A list of numbers that represent the repeated dash length and dash space applied to the stroke of the text.
          * @see {@link https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-dasharray} for more information on the SVG stroke-dasharray attribute.
          */
-        dashes: number[];
+        dashes: any[];
         /**
          * @name Two.Points#clone
          * @function
@@ -3957,25 +3957,25 @@ declare module "two.js/src/shapes/points" {
          * @function
          * @description Short hand method to set fill to `transparent`.
          */
-        noFill: () => Points;
+        noFill: () => Path;
         /**
          * @name Two.Points#noStroke
          * @function
          * @description Short hand method to set stroke to `transparent`.
          */
-        noStroke: () => Points;
+        noStroke: () => Path;
         /**
          * @name Two.Points#corner
          * @function
          * @description Orient the vertices of the shape to the upper left-hand corner of the points object.
          */
-        corner: () => Points;
+        corner: () => Path;
         /**
          * @name Two.Points#center
          * @function
          * @description Orient the vertices of the shape to the center of the points object.
          */
-        center: () => Points;
+        center: () => Path;
         /**
          * @name Two.Points#getBoundingClientRect
          * @function
@@ -4132,7 +4132,7 @@ declare module "two.js/src/shapes/star" {
          * @property {String[]} - A list of properties that are on every {@link Two.Star}.
          */
         static Properties: string[];
-        constructor(ox: any, oy: any, ir: any, or: any, sides: any, ...args: any[]);
+        constructor(x: any, y: any, innerRadius: any, outerRadius: any, sides: any, ...args: any[]);
         /**
          * @name Two.Star#_flagInnerRadius
          * @private
@@ -4230,7 +4230,7 @@ declare module "two.js/src/renderers/svg" {
                 center: string;
                 right: string;
             };
-            createElement: (name: any, attrs: any) => SVGElement;
+            createElement: (name: any, attrs: any) => Element;
             setAttributes: (elem: any, attrs: any) => any;
             removeAttributes: (elem: any, attrs: any) => any;
             toString: (points: any, closed: any) => string;
@@ -4277,7 +4277,7 @@ declare module "two.js/src/renderers/svg" {
          * @name Two.SVGRenderer#defs
          * @property {SvgDefintionsElement} - The `<defs />` to apply gradients, patterns, and bitmap imagery.
          */
-        defs: SVGDefsElement;
+        defs: Element;
         /**
          * @name Two.SVGRenderer#setSize
          * @function
@@ -4390,7 +4390,7 @@ declare module "two.js/src/renderers/webgl" {
          * @name Two.WebGLRenderer#domElement
          * @property {Element} - The `<canvas />` associated with the Two.js scene.
          */
-        domElement: HTMLCanvasElement;
+        domElement: any;
         /**
          * @name Two.WebGLRenderer#scene
          * @property {Two.Group} - The root group of the scenegraph.
@@ -4621,7 +4621,7 @@ declare module "two.js/src/two" {
          * @param {Element} elem - The DOM element to append the Two.js stage to.
          * @description Shorthand method to append your instance of Two.js to the `document`.
          */
-        appendTo(elem: HTMLElement): Two;
+        appendTo(elem: Element): Two;
         /**
          * @name Two#play
          * @function

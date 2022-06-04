@@ -729,8 +729,8 @@ var Two = (() => {
       svg: "SVGRenderer",
       canvas: "CanvasRenderer"
     },
-    Version: "v0.8.8",
-    PublishDate: "2022-06-04T10:58:28.490Z",
+    Version: "v0.8.10",
+    PublishDate: "2022-06-04T11:26:40.892Z",
     Identifier: "two-",
     Resolution: 12,
     AutoCalculateImportedMatrices: true,
@@ -7767,7 +7767,7 @@ var Two = (() => {
   var cos6 = Math.cos;
   var sin6 = Math.sin;
   var _Star = class extends Path {
-    constructor(ox, oy, ir, or, sides) {
+    constructor(x, y, innerRadius, outerRadius, sides) {
       if (arguments.length <= 3) {
         outerRadius = innerRadius;
         innerRadius = outerRadius / 2;
@@ -7797,11 +7797,11 @@ var Two = (() => {
         this.sides = sides;
       }
       this._update();
-      if (typeof ox === "number") {
-        this.translation.x = ox;
+      if (typeof x === "number") {
+        this.translation.x = x;
       }
-      if (typeof oy === "number") {
-        this.translation.y = oy;
+      if (typeof y === "number") {
+        this.translation.y = y;
       }
     }
     _update() {
