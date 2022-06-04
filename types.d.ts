@@ -657,10 +657,6 @@ declare module "two.js/src/utils/root" {
     export let root: any;
 }
 declare module "two.js/src/utils/math" {
-    import type { Shape } from "two.js/src/shape";
-    import { Matrix } from "two.js/src/matrix";
-    const TWO_PI: number;
-    const HALF_PI: number;
     /**
      * @name Two.Utils.decomposeMatrix
      * @function
@@ -668,14 +664,7 @@ declare module "two.js/src/utils/math" {
      * @returns {Object} An object containing relevant skew values.
      * @description Decompose a 2D 3x3 Matrix to find the skew.
      */
-    function decomposeMatrix(matrix: any, b: any, c: any, d: any, e: any, f: any): {
-        translateX: any;
-        translateY: any;
-        scaleX: number;
-        scaleY: number;
-        rotation: number;
-    };
-    function setMatrix(matrix: any): void;
+    export function decomposeMatrix(matrix: Two.Matrix, b: any, c: any, d: any, e: any, f: any, ...args: any[]): any;
     /**
      * @name Two.Utils.getComputedMatrix
      * @function
@@ -684,7 +673,9 @@ declare module "two.js/src/utils/math" {
      * @returns {Two.Matrix} The computed matrix of a nested object. If no `matrix` was passed in arguments then a `new Two.Matrix` is returned.
      * @description Method to get the world space transformation of a given object in a Two.js scene.
      */
-    function getComputedMatrix(object: Shape, matrix: Matrix): Matrix;
+    export function getComputedMatrix(object: Two.Shape, matrix?: Two.Matrix): Two.Matrix;
+    export function getPoT(value: any): number;
+    export function setMatrix(matrix: any): void;
     /**
      * @name Two.Utils.lerp
      * @function
@@ -694,8 +685,7 @@ declare module "two.js/src/utils/math" {
      * @returns {Number}
      * @description Linear interpolation between two values `a` and `b` by an amount `t`.
      */
-    function lerp(a: any, b: any, t: any): any;
-    function getPoT(value: any): number;
+    export function lerp(a: number, b: number, t: number): number;
     /**
      * @name Two.Utils.mod
      * @function
@@ -704,8 +694,8 @@ declare module "two.js/src/utils/math" {
      * @returns {Number}
      * @description Modulo with added functionality to handle negative values in a positive manner.
      */
-    function mod(v: any, l: any): number;
-    const NumArray: any;
+    export function mod(v: number, l: number): number;
+    export const NumArray: any;
     /**
     * @name Two.Utils.toFixed
     * @function
@@ -714,8 +704,9 @@ declare module "two.js/src/utils/math" {
     * @description A pretty fast toFixed(3) alternative.
     * @see {@link http://jsperf.com/parsefloat-tofixed-vs-math-round/18}
     */
-    function toFixed(v: any): number;
-    export { decomposeMatrix, getComputedMatrix, getPoT, setMatrix, lerp, mod, NumArray, toFixed, TWO_PI, HALF_PI };
+    export function toFixed(v: number): number;
+    export const TWO_PI: number;
+    export const HALF_PI: number;
 }
 declare module "two.js/src/matrix" {
     /**
